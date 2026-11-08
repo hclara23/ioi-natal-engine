@@ -1,0 +1,21 @@
+{
+  "name": "ioi-natal-engine",
+  "version": "1.0.0",
+  "description": "Natal chart calculation service: birth data in, chart factors (bodies, houses, aspects, balances) out. Built on the Swiss Ephemeris.",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "main": "src/index.js",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+    "verify": "node scripts/verify-fixtures.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "sweph": "2.10.3-8",
+    "zod": "^4.6.6"
+  }
+}

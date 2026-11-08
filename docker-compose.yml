@@ -1,0 +1,38 @@
+# Standalone deployment next to the IOI stack. Joins the existing `ioi_network`
+# so ioi-api can reach it at http://ioi-natal:3060 without publishing a port
+# beyond loopback. Public access (natal.<domain>) is a cloudflared ingress rule.
+services:
+  ioi-natal:
+    build: .
+    image: ioi-natal-engine:${NATAL_TAG:-latest}
+    container_name: ioi-natal
+    restart: always
+    logging:
+      driver: journald
+      options:
+        tag: '{{.Name}}'
+    environment:
+      PORT: '3060'
+      NATAL_API_KEY: ${NATAL_API_KEY:?set NATAL_API_KEY in .env}
+      PUBLIC_COMPUTE: ${PUBLIC_COMPUTE:-0}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-60}
+      SOURCE_URL: ${SOURCE_URL:-https://github.com/hclara23/ioi-natal-engine}
+      # cloudflared connects directly from the docker network: one trusted hop.
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+    ports:
+      - 127.0.0.1:3060:3060
+    networks:
+      - ioi_network
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3060/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  ioi_network:
+    external: true
+    name: ioi_network
